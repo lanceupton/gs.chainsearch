@@ -24,11 +24,11 @@ If you have any issues with the below process, please do not hesitate to reach o
 
 * The `renv` package is used to track dependencies. When the R session begins, the package installs itself and restores the package library. If any issues occur, a message will be displayed. *Follow any suggestions these messages make*. For instance, you should expect a message when you open the R project for the first time after cloning, instructing you to do `renv::restore()`. This is because actual package installations aren't tracked in Github.
 
-* **IMPORTANT**: Standalone scripts should be saved within the `dev/` directory. This directory is ignored when the package is built and the code there will not be evaluated. This is a good place to store demo code.
+* **IMPORTANT**: If you are writing a demo, example, or POC, save the file in the `dev/` directory. This directory is ignored when the package is built and the code there will not be evaluated.
 
 * To rebuild the package during development, do `golem::document_and_reload()`. This will load the package and make exported methods available in the current session. It is a good idea to have this command binded to a shortcut since you will probably be doing it a lot.
 
-* Make your changes, commit them to git, and then create a PR into upstream. The title of your PR should briefly describe the change and the body should contain `Fixes #issue-number`.
+* Make your changes, commit them to git, and then create a PR into upstream. The title of your PR should briefly describe the change and the body should contain "Fixes #<issue-number>" with `issue_number` corresponding to the issue number of the issue that the PR fixes.
 
 * For user-facing changes, add a bullet to the top of `NEWS.md` (i.e. just below the first header). Follow the style described in <https://style.tidyverse.org/news.html>.
 
@@ -37,11 +37,11 @@ If you have any issues with the below process, please do not hesitate to reach o
 
 If your code changes require a new package to be installed, please follow the below procedure:
 
-1. Do `renv::install(<pkg>)` to install the package.
+1. Do `renv::install(<pkg>)` to install the package locally.
 
-2. Do `usethis::use_package(<pkg>, min_version = TRUE)` to add the package to `DESCRIPTION`.
+2. Do `usethis::use_package(<pkg>, min_version = TRUE)` to add the package to `DESCRIPTION`. The package uses `explicit` snapshots, so this is required for the next step.
 
-3. Do `renv::snapshot()` to update `renv.lock`, which is used for tracking purposes.
+3. Do `renv::snapshot()` to update `renv.lock`. This file is used for tracking purposes.
 
 4. Include the appropriate `roxygen2` tags ("#' @importFrom <pkg> <method1> <method2> <...>") in the method that uses the new package.
 
@@ -58,3 +58,4 @@ If your code changes require a new package to be installed, please follow the be
 ## Code of Conduct
 
 Please note that the gs.chainsearch project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project you agree to abide by its terms.
+

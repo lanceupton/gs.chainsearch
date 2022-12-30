@@ -43,13 +43,12 @@ subdirectory within that. The structure is as follows:
         ├── meta_raw.csv
         ├── meta_final.csv
 
-- `proxy_table.csv`: A table of proxy IPs. The table includes `ip`,
-  `port`, and `active` (either TRUE or FALSE, indicating if the proxy is
-  the current default\`.
-- `proxy_blacklist.csv`: A table of proxy IPs that are marked as
+- `proxy_table.csv`: A table of available proxies. The table includes
+  `ip`, `port`, and metadata for each proxy.
+- `proxy_blacklist.csv`: A table of proxies that are marked as
   “blacklisted”, either manually via `blacklist_ip` or automatically via
-  `save_gs_page(..., auto_cycle_ip = TRUE)`. The table includes `ip` and
-  `mark_method` (either “manual” or “automatic”).
+  `save_gs_page(..., auto_cycle_ip = TRUE)`. The table includes `ip`,
+  `port`, and `method` (either “manual” or “automatic”).
 - `<publication_id>/`: Dedicated storage for a cornerstone publication.
 - `pages/`: A subdirectory used as storage for raw HTML files that are
   scraped.
@@ -60,8 +59,8 @@ subdirectory within that. The structure is as follows:
 
 A proxy cycling procedure is implemented internally in order to
 gracefully recover from IP bans issued by Google. At the beginning of a
-working session, a fresh list of public proxies is fetched (thanks
-[Geonode](https://geonode.com/free-proxy-list/)!. This list is randomly
+working session, a fresh list of public proxies is fetched from
+[Geonode](https://geonode.com/free-proxy-list/). This list is randomly
 sampled during the scraping process. Each time an IP ban is detected,
 the culprit IP is blacklisted and subsequent scrapes will not consider
 it.

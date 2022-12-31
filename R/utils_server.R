@@ -10,3 +10,32 @@ bind_state <- function(id, condition, invert = FALSE, asis = FALSE) {
     }
   })
 }
+
+#' @importFrom gargoyle init
+trigger_init <- function(id) {
+  init(id)
+}
+
+#' @importFrom gargoyle trigger
+trigger_press <- function(id) {
+  trigger(id)
+}
+
+#' @importFrom gargoyle watch
+trigger_watch <- function(id) {
+  watch(id)
+}
+
+#' @importFrom gargoyle on
+#' @importFrom rlang enquo0
+#' @importFrom shiny quoToFunction
+on_trigger <- function(id, expr) {
+  fun <- quoToFunction(enquo0(expr))
+  on(id, fun())
+}
+  
+#' @importFrom shiny isTruthy
+"%||%" <- function(x, y) {
+  if (isTruthy(x)) x else if (isTruthy(y)) y else NULL
+}
+  

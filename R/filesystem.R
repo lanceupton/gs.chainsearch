@@ -1,6 +1,15 @@
 
 # FILESYSTEM --------------------------------------------------------------
 
+# List available fileystem volumes
+#' @importFrom shinyFiles getVolumes
+list_user_volumes <- function() {
+  c(
+    "Default Storage" = storage_default(),
+    getVolumes()()
+  )
+}
+
 # Default storage directory
 #' @importFrom golem get_golem_name
 #' @importFrom tools R_user_dir
@@ -31,6 +40,7 @@ storage_read <- function() {
 
 # Set active storage
 storage_set <- function(path) {
+  LOG_MSG("storage_set: ", path)
   Sys.setenv(GS_CHAINSEARCH_STORAGE = path)
 }
 
@@ -41,6 +51,7 @@ storage_get <- function() {
 
 # Update active storage
 storage_update <- function(path) {
+  LOG_MSG("storage_update: ", path)
   # Set new storage
   storage_set(path)
   storage_write(path)
@@ -69,11 +80,19 @@ read_csv <- function(file) {
 
 # SESSION -----------------------------------------------------------------
 
-# Initialize a working session
+#' Initialize a gs.chainsearch Working Session.
+#' 
+#' Set up the local environment to use methods from the package.
+#' 
+#' @export
+#'
 session_init <- function() {
+  LOG_MSG("Initializing working session")
   # Restore active storage directory
   path <- storage_read()
   storage_set(path)
+  # Set active publication
+  pub_set(pub_read())
   # Set proxy blacklist
   proxybl_set(proxybl_read())
   # Refresh and set proxy list

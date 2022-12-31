@@ -9,13 +9,12 @@ mod_proxy_ui <- function(id) {
   )
 }
 
-#' @importFrom gargoyle init watch
 mod_proxy_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Trigger used to communicate blacklist action
-    init("proxy_blacklist")
+    # Initialize global triggers
+    trigger_init("proxy_blacklist")
     
     mod_proxy_table_server("table")
     mod_proxy_blacklist_server("blacklist")
@@ -49,7 +48,6 @@ mod_proxy_table_ui <- function(id) {
 }
 
 #' @importFrom DT renderDT
-#' @importFrom gargoyle trigger
 mod_proxy_table_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -67,11 +65,11 @@ mod_proxy_table_server <- function(id) {
       tryCatch(
         expr = {
           popup_loading("Reloading proxy table...")
-          refresh_proxy_table()
+          refresh_proxy_table(force = TRUE)
           rv_proxytab(proxytab_get())
           popup_success("Proxy table updated!")
         },
-        error = popup_error
+        error = popup_error()
       )
     })
     
@@ -89,10 +87,10 @@ mod_proxy_table_server <- function(id) {
           tmp <- proxytab_get()
           rv_proxytab(tmp)
           # Trigger blacklist
-          trigger("proxy_blacklist")
+          trigger_press("proxy_blacklist")
           popup_success("Proxy blacklisted!")
         },
-        error = popup_error
+        error = popup_error()
       )
     })
     
@@ -120,7 +118,6 @@ mod_proxy_blacklist_ui <- function(id) {
 }
 
 #' @importFrom DT renderDT
-#' @importFrom gargoyle on
 mod_proxy_blacklist_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -131,7 +128,7 @@ mod_proxy_blacklist_server <- function(id) {
     selected_row <- reactive(input$dt_proxytab_rows_selected)
     
     # Blacklist callback
-    on("proxy_blacklist", rv_proxytab(proxybl_get()))
+    on_trigger("proxy_blacklist", rv_proxytab(proxybl_get()))
     
     # Toggle UI
     bind_state("btn_whitelist", selected_row)
@@ -151,7 +148,7 @@ mod_proxy_blacklist_server <- function(id) {
           rv_proxytab(tmp)
           popup_success("Proxy whitelisted!")
         },
-        error = popup_error
+        error = popup_error()
       )
     })
     

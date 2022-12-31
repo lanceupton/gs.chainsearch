@@ -4,12 +4,11 @@
 \alias{refresh_proxy_table}
 \title{Refresh the Active Proxy Table.}
 \usage{
-refresh_proxy_table(limit = 100)
+refresh_proxy_table(force = FALSE)
 }
 \arguments{
-\item{limit}{(Default 100) The maximum number of proxy entries to fetch. The
-larger this number, the longer evaluation will take. The number of entries
-actually returned may be less, depending on current availability.}
+\item{force}{(Default FALSE); This function will do nothing if the proxy
+table has been refreshed in the past hour, unless `force = TRUE`.}
 }
 \description{
 Fetch a new proxy table via the API provided by Geonode (see

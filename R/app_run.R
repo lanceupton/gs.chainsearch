@@ -22,7 +22,7 @@ app_run <- function(
       server = app_server,
       onStart = function() {
         LOG_MSG("Loading Application", type = "title")
-        LOG_MSG("R_CONFIG_ACTIVE: ", app_config(), type = "info")
+        LOG_MSG("R_CONFIG_ACTIVE: ", app_config())
         if (!is.null(onStart)) onStart()
       },
       options = options,

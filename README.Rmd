@@ -30,6 +30,8 @@ By default, this package tracks files within the R user package cache (see `tool
 
 ```
 ├── /<storage>/
+  ├── publication
+  ├── storage
   ├── proxy_table.csv
   ├── proxy_blacklist.csv
   ├── <publication_id>/
@@ -41,6 +43,8 @@ By default, this package tracks files within the R user package cache (see `tool
     ├── meta_final.csv
 ```
 
+* `publication`: A file giving the ID of the active publication.
+* `storage`: A file giving the path to active storage. This file is only kept in the default storage directory.
 * `proxy_table.csv`: A table of available proxies. The table includes `ip`, `port`, and metadata for each proxy.
 * `proxy_blacklist.csv`: A table of proxies that are marked as "blacklisted", either manually via `blacklist_ip` or automatically via `save_gs_page(..., auto_cycle_ip = TRUE)`. The table includes `ip`, `port`, and `method` (either "manual" or "automatic").
 * `<publication_id>/`: Dedicated storage for a cornerstone publication.
@@ -61,7 +65,7 @@ This package includes a shiny interface accessible by running `gs.chainsearch::a
 
 #### Session Settings
 
-Via the `Session Settings` interface, the user is able to select the storage directory, indicate the cornerstone publication, and manage package files.
+Via the `Session Settings` interface, the user is able to select the storage directory and manage package files.
 
 
 #### Proxy Settings

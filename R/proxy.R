@@ -13,9 +13,11 @@ proxytab_write <- function(x) {
   file <- proxytab_file()
   write_csv(x, file)
 }
+#' @importFrom shiny shinyOptions
 proxytab_set <- function(tab) {
   shinyOptions(GS_CHAINSEARCH_PROXYTAB = tab)
 }
+#' @importFrom shiny getShinyOption
 proxytab_get <- function() {
   getShinyOption("GS_CHAINSEARCH_PROXYTAB")
 }
@@ -32,9 +34,11 @@ proxybl_write <- function(x) {
   file <- proxybl_file()
   write_csv(x, file)
 }
+#' @importFrom shiny shinyOptions
 proxybl_set <- function(tab) {
   shinyOptions(GS_CHAINSEARCH_PROXYBL = tab)
 }
+#' @importFrom shiny getShinyOption
 proxybl_get <- function() {
   getShinyOption("GS_CHAINSEARCH_PROXYBL")
 }
@@ -76,13 +80,20 @@ proxy_get <- function() {
 #'   https://geonode.com/free-proxy-list/) and update the proxy list used for
 #'   scraping.
 #' 
-#' @param limit (Default 100) The maximum number of proxy entries to fetch. The
-#'   larger this number, the longer evaluation will take. The number of entries
-#'   actually returned may be less, depending on current availability.
+#' @param force (Default FALSE); This function will do nothing if the proxy
+#'   table has been refreshed in the past hour, unless `force = TRUE`.
 #'   
-refresh_proxy_table <- function(limit = 100) {
+refresh_proxy_table <- function(force = FALSE) {
+  if (isFALSE(force) && proxy_table_recent()) {
+    LOG_MSG("Proxy table is fresh", type = "success")
+    tab <- proxytab_read()
+    tab <- filter_proxy_table(tab)
+    proxytab_set(tab)
+    return()
+  }
+  LOG_MSG("Refreshing proxy table")
   # Fetch new table
-  tab <- fetch_proxy_table(limit)
+  tab <- fetch_proxy_table()
   # Remove blacklisted entries
   tab <- filter_proxy_table(tab)
   # Update active proxylist
@@ -124,11 +135,20 @@ whitelist_proxy <- function(ip, port) {
 
 # UTILS -------------------------------------------------------------------
 
+# Check if the proxy table is fresh
+# i.e., written in the past hour
+proxy_table_recent <- function() {
+  now <- Sys.time()
+  then <- file.info(proxytab_file())$mtime
+  diff <- as.numeric(difftime(now, then, units = "hour"))
+  return(diff < 1)
+}
+
 # Fetch the proxy table
 #' @importFrom jsonlite fromJSON
-fetch_proxy_table <- function(limit) {
+fetch_proxy_table <- function() {
   # TODO: Loop through fast, medium, slow until limit is attained
-  url <- proxy_table_url(limit, 1)
+  url <- proxy_table_url(100, 1)
   tmp <- fromJSON(url)
   # Wrangle into data frame
   tmp <- lapply(tmp$data, unlist)

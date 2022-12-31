@@ -6,13 +6,12 @@ make_log_text <- function(...) {
   paste0(unlist(lst), collapse = "")
 }
 
-#' @importFrom cli cli_alert_danger cli_alert_info cli_alert_success cli_alert_warning cli_h1 cli_verbatim
-LOG_MSG <- function(..., type = c("default", "info", "success", "warning", "error", "title")) {
+#' @importFrom cli cli_alert_danger cli_alert_info cli_alert_success cli_alert_warning cli_h1
+LOG_MSG <- function(..., type = c("info", "success", "warning", "error", "title")) {
   type <- match.arg(type)
   msg <- make_log_text(...)
   switch(
     EXPR = type,
-    default = cli_verbatim(msg),
     info = cli_alert_info(msg),
     success = cli_alert_success(msg),
     warning = cli_alert_warning(msg),
@@ -24,9 +23,40 @@ LOG_MSG <- function(..., type = c("default", "info", "success", "warning", "erro
 # POPUPS ------------------------------------------------------------------
 
 #' @importFrom shinyalert shinyalert
+popup_text <- function(title = "", inputValue = "", inputPlaceholder = "", confirmButtonText = "", callback = NULL) {
+  shinyalert(
+    title = title,
+    type = "input",
+    closeOnEsc = TRUE,
+    closeOnClickOutside = TRUE,
+    showCancelButton = TRUE,
+    inputType = "text",
+    inputValue = inputValue,
+    confirmButtonText = confirmButtonText,
+    inputPlaceholder = inputPlaceholder,
+    callbackR = callback
+  )
+}
+
+#' @importFrom shinyalert shinyalert
+popup_confirm <- function(title = "", text = "", callback = NULL) {
+  shinyalert(
+    title = title,
+    text = as.character(text),
+    type = "",
+    closeOnEsc = TRUE,
+    html = TRUE,
+    closeOnClickOutside = TRUE,
+    showCancelButton = TRUE,
+    confirmButtonText = "Confirm",
+    callbackR = callback
+  )
+}
+
+#' @importFrom shinyalert shinyalert
 popup_template <- function(
-  title = "", text = "", type = "", easyClose = TRUE, showConfirm = TRUE,
-  confirmText = "OK", timer = 0, callback = NULL, immediate = TRUE
+    title = "", text = "", type = "", easyClose = TRUE, showConfirm = TRUE,
+    confirmText = "OK", timer = 0, callback = NULL
 ) {
   shinyalert(
     title = title,
@@ -39,7 +69,7 @@ popup_template <- function(
     timer = timer,
     html = TRUE,
     callbackR = callback,
-    immediate = immediate
+    immediate = TRUE
   )
 }
 
@@ -90,7 +120,7 @@ popup_fail <- function(..., title = "Whoops!") {
   popup_template(
     title = title,
     text = tags$p(style = "overflow-wrap: break-word;", msg),
-    type = "error"
+    type = "error",
   )
 }
 

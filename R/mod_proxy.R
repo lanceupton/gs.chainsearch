@@ -40,7 +40,7 @@ mod_proxy_table_ui <- function(id) {
       ),
       disabled(btn_primary(
         inputId = ns("btn_blacklist"),
-        label = "Blacklist Selected Proxy",
+        label = "Blacklist Selected Proxies",
         icon = icon("cancel")
       ))
     )
@@ -55,17 +55,17 @@ mod_proxy_table_server <- function(id) {
     # Proxy table
     rv_proxytab <- reactiveVal(proxytab_get())
     output$dt_proxytab <- renderDT(dt_proxytab(rv_proxytab()))
-    selected_row <- reactive(input$dt_proxytab_rows_selected)
+    selected_rows <- reactive(input$dt_proxytab_rows_selected)
     
     # Toggle UI
-    bind_state("btn_blacklist", selected_row)
+    bind_state("btn_blacklist", selected_rows)
     
     # Reload proxy table
     observeEvent(input$btn_reload, {
       tryCatch(
         expr = {
           popup_loading("Reloading proxy table...")
-          refresh_proxy_table(force = TRUE)
+          refresh_proxy_list(force = TRUE)
           rv_proxytab(proxytab_get())
           popup_success("Proxy table updated!")
         },
@@ -77,18 +77,18 @@ mod_proxy_table_server <- function(id) {
     observeEvent(input$btn_blacklist, {
       tryCatch(
         expr = {
-          popup_loading("Blacklisting proxy...")
+          popup_loading("Blacklisting proxies...")
           # Selected proxy
           df <- rv_proxytab()
-          row <- as.list(df[selected_row(), ])
+          rows <- as.list(df[selected_rows(), ])
           # Blacklist proxy
-          blacklist_proxy(row$ip, row$port)
+          blacklist_proxy(rows$ip, rows$port)
           # Update table
           tmp <- proxytab_get()
           rv_proxytab(tmp)
           # Trigger blacklist
           trigger_press("proxy_blacklist")
-          popup_success("Proxy blacklisted!")
+          popup_success("Proxies blacklisted!")
         },
         error = popup_error()
       )
@@ -110,7 +110,7 @@ mod_proxy_blacklist_ui <- function(id) {
     footer = tagList(
       disabled(btn_primary(
         inputId = ns("btn_whitelist"),
-        label = "Whitelist Selected Proxy",
+        label = "Whitelist Selected Proxies",
         icon = icon("check")
       ))
     )
@@ -125,28 +125,28 @@ mod_proxy_blacklist_server <- function(id) {
     # Proxy table
     rv_proxytab <- reactiveVal(proxybl_get())
     output$dt_proxytab <- renderDT(dt_proxybl(rv_proxytab()))
-    selected_row <- reactive(input$dt_proxytab_rows_selected)
+    selected_rows <- reactive(input$dt_proxytab_rows_selected)
     
     # Blacklist callback
     on_trigger("proxy_blacklist", rv_proxytab(proxybl_get()))
     
     # Toggle UI
-    bind_state("btn_whitelist", selected_row)
+    bind_state("btn_whitelist", selected_rows)
     
     # Whitelist proxy
     observeEvent(input$btn_whitelist, {
       tryCatch(
         expr = {
-          popup_loading("Whitelisting proxy...")
+          popup_loading("Whitelisting proxies...")
           # Selected proxy
           df <- rv_proxytab()
-          row <- as.list(df[selected_row(), ])
+          row <- as.list(df[selected_rows(), ])
           # Whitelist proxy
           whitelist_proxy(row$ip, row$port)
           # Update table
           tmp <- proxybl_get()
           rv_proxytab(tmp)
-          popup_success("Proxy whitelisted!")
+          popup_success("Proxies whitelisted!")
         },
         error = popup_error()
       )

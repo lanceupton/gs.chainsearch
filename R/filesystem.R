@@ -1,11 +1,130 @@
 
-# FILESYSTEM --------------------------------------------------------------
+# USER-FACING -------------------------------------------------------------
+
+#' Initialize a Working Session.
+#' 
+#' Restore the local environment to use methods from the package.
+#'
+#' @importFrom fs dir_create  
+#' @export
+#'
+initialize_session <- function() {
+  LOG_MSG("Initializing working session")
+  # Create package storage
+  dir_create(package_storage())
+  # Restore active session
+  session_set(session_read())
+  # Create default config
+  settings_init()
+  # Restore proxy blacklist
+  proxybl <- proxybl_read()
+  proxybl_set(proxybl)
+  # Refresh proxy list
+  refresh_proxy_list()
+  # Set new active proxy
+  proxy_set()
+  # Return invisible so no tags are included
+  return(invisible())
+}
+
+activate_session <- function(session_id) {
+  session_set(session_id)
+  session_write(session_id)
+}
+
+#' @importFrom yaml read_yaml write_yaml
+delete_session <- function(session_id) {
+  file <- settings_file()
+  tmp <- read_yaml(file)
+  tmp <- tmp[-which(names(tmp) == session_id)]
+  write_yaml(tmp, file)
+}
+
+create_session <- function(session_id) {
+  settings_set(session_id = session_id)
+  activate_session(session_id)
+}
+
+#' @importFrom yaml read_yaml
+session_list <- function() {
+  file <- settings_file()
+  tmp <- read_yaml(file)
+  names(tmp)
+}
+
+# TRACKING ----------------------------------------------------------------
+
+# Name of active session
+session_file <- function() {
+  package_path("session")
+}
+session_read <- function() {
+  file <- session_file()
+  if (file.exists(file)) readLines(file)
+}
+session_write <- function(x) {
+  file <- session_file()
+  writeLines(x, file)
+}
+session_set <- function(session_id) {
+  if (is.null(session_id)) return()
+  Sys.setenv(GS_CHAINSEARCH_SESSION = session_id)
+}
+session_get <- function() {
+  Sys.getenv("GS_CHAINSEARCH_SESSION", "default")
+}
+
+# Session settings
+settings_file <- function() {
+  package_path("settings.yaml")
+}
+
+settings_default <- function() {
+  list(
+    storage = package_storage(),
+    url = "https://www.amazon.com/s"
+  )
+}
+
+# Function to enforce that default config exists
+# Merge in reverse in order to retain previous values
+settings_init <- function() {
+  file <- settings_file()
+  if (file.exists(file)) {
+    tmp <- read_yaml(file)
+  } else {
+    tmp <- NULL
+  }
+  lst <- merge(list(default = settings_default()), tmp)
+  write_yaml(lst, file)
+}
+
+#' @importFrom config get
+settings_get <- function(value = NULL) {
+  get(
+    value = value,
+    config = session_get(),
+    file = settings_file()
+  )
+}
+
+#' @importFrom yaml read_yaml write_yaml
+#' @importFrom config merge
+settings_set <- function(..., session_id = session_get()) {
+  file <- settings_file()
+  tmp <- read_yaml(file)
+  lst <- setNames(list(list(...)), session_id)
+  lst2 <- merge(tmp, lst)
+  write_yaml(lst2, file)
+}
+
+# UTILS -------------------------------------------------------------------
 
 # List available fileystem volumes
 #' @importFrom shinyFiles getVolumes
 list_user_volumes <- function() {
   c(
-    "Default Storage" = storage_default(),
+    "Default Storage" = package_storage(),
     getVolumes()()
   )
 }
@@ -13,92 +132,12 @@ list_user_volumes <- function() {
 # Default storage directory
 #' @importFrom golem get_golem_name
 #' @importFrom tools R_user_dir
-storage_default <- function() {
+package_storage <- function() {
   R_user_dir(package = get_golem_name(), which = "cache")
-}
-
-# Marker file for active storage
-storage_file <- function() {
-  file.path(storage_default(), "storage")
-}
-
-# Update marker file
-storage_write <- function(path) {
-  file <- storage_file()
-  writeLines(path, file)
-}
-
-# Read marker file
-storage_read <- function() {
-  file <- storage_file()
-  if (file.exists(file)) {
-    readLines(file)
-  } else {
-    storage_default()
-  }
-}
-
-# Set active storage
-storage_set <- function(path) {
-  LOG_MSG("storage_set: ", path)
-  Sys.setenv(GS_CHAINSEARCH_STORAGE = path)
-}
-
-# Get active storage
-storage_get <- function() {
-  Sys.getenv("GS_CHAINSEARCH_STORAGE", storage_default())
-}
-
-# Update active storage
-storage_update <- function(path) {
-  LOG_MSG("storage_update: ", path)
-  # Set new storage
-  storage_set(path)
-  storage_write(path)
-  # Write key files
-  proxytab_write(proxytab_get())
-  proxybl_write(proxybl_get())
 }
 
 # Construct filepath within active storage
 #' @importFrom fs path
-storage_path <- function(..., ext = "") {
-  path(storage_get(), ..., ext = ext)
-}
-
-# I/O ---------------------------------------------------------------------
-
-#' @importFrom data.table fwrite
-write_csv <- function(x, file) {
-  fwrite(x, file)
-}
-
-#' @importFrom data.table fread
-read_csv <- function(file) {
-  fread(file = file, stringsAsFactors = FALSE, check.names = FALSE, fill = TRUE, data.table = FALSE)
-}
-
-# SESSION -----------------------------------------------------------------
-
-#' Initialize a gs.chainsearch Working Session.
-#' 
-#' Set up the local environment to use methods from the package.
-#' 
-#' @export
-#'
-session_init <- function() {
-  LOG_MSG("Initializing working session")
-  # Restore active storage directory
-  path <- storage_read()
-  storage_set(path)
-  # Set active publication
-  pub_set(pub_read())
-  # Set proxy blacklist
-  proxybl_set(proxybl_read())
-  # Refresh and set proxy list
-  refresh_proxy_table()
-  # Set new active proxy
-  proxy_set()
-  # Return invisible so no tags are included
-  return(invisible())
+package_path <- function(..., ext = "") {
+  path(package_storage(), ..., ext = ext)
 }

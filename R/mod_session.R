@@ -4,8 +4,8 @@
 mod_session_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    mod_session_settings_ui(ns("settings")),
-    mod_session_publications_ui(ns("publications"))
+    mod_session_select_ui(ns("select")),
+    mod_session_settings_ui(ns("settings"))
   )
 }
 
@@ -14,13 +14,119 @@ mod_session_server <- function(id) {
     ns <- session$ns
     
     # Initialize global triggers
+    trigger_init("active_session")
+    trigger_init("session_list")
     trigger_init("session_settings")
-    trigger_init("publication_list")
-    trigger_init("active_publication")
     
     # Modules
+    mod_session_select_server("select")
     mod_session_settings_server("settings")
-    mod_session_publications_server("publications")
+    
+  })
+}
+
+# SESSION SELECT ----------------------------------------------------------
+
+mod_session_select_ui <- function(id) {
+  ns <- NS(id)
+  card_primary(
+    title = "Session Select",
+    icon = icon("folder-tree"),
+    tags$strong("Active session:"),
+    verbatimTextOutput(ns("active_session")),
+    tags$hr(),
+    selectInput(
+      inputId = ns("session"),
+      label = "Available sessions:",
+      selected = session_get(),
+      choices = session_list()
+    ),
+    footer = tagList(
+      btn_primary(
+        inputId = ns("btn_activate"),
+        label = "Activate Session",
+        icon = icon("check")
+      ),
+      btn_primary(
+        inputId = ns("btn_delete"),
+        label = "Delete Session",
+        icon = icon("trash")
+      ),
+      btn_primary(
+        inputId = ns("btn_create"),
+        label = "Create New Session",
+        icon = icon("plus")
+      )
+    )
+  )
+}
+
+mod_session_select_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+    on_trigger("active_session", {
+      updateSelectInput(
+        inputId = "session",
+        selected = session_get()
+      )
+    })
+    
+    on_trigger("session_list", {
+      updateSelectInput(
+        inputId = "session",
+        choices = session_list(),
+        selected = session_get()
+      )
+    })
+    
+    # Activate session
+    observeEvent(input$btn_activate, {
+      tryCatch(
+        expr = {
+          popup_loading("Activating session...")
+          activate_session(input$session)
+          trigger_press("active_session")
+          popup_success("Session activated!")
+        },
+        error = popup_error()
+      )
+    })
+    
+    # Delete session
+    observeEvent(input$btn_delete, {
+      tryCatch(
+        expr = {
+          popup_loading("Deleting session...")
+          delete_session(input$session)
+          trigger_press("session_list")
+          popup_success("Session deleted!")
+        },
+        error = popup_error()
+      )
+    })
+    
+    # Create session
+    observeEvent(input$btn_create, {
+      popup_text(
+        title = "Create Session",
+        inputPlaceholder = "Session Name",
+        confirmButtonText = "Create Session",
+        callback = function(res) {
+          if (isFALSE(res)) return()
+          tryCatch(
+            expr = {
+              popup_loading("Creating session...")
+              create_session(res)
+              trigger_press("active_session")
+              trigger_press("session_list")
+              popup_success("Session created!")
+            },
+            error = popup_error()
+          )
+        }
+      )
+    })
     
   })
 }
@@ -62,8 +168,9 @@ mod_session_settings_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    rv_path <- reactiveVal(storage_get())
-    on_trigger("session_settings", rv_path(storage_get()))
+    rv_path <- reactiveVal(settings_get("storage"))
+    on_trigger("active_session", trigger_press("session_settings"))
+    on_trigger("session_settings", rv_path(settings_get("storage")))
     
     shinyDirChoose(
       input = input,
@@ -79,18 +186,17 @@ mod_session_settings_server <- function(id) {
     
     output$storage_dir <- renderText(rv_path())
     
-    # Revert to default settings
+    # Apply default settings
     observeEvent(input$btn_defaults, {
       tryCatch(
         expr = {
           popup_loading("Applying default settings...")
-          storage_update(storage_default())
+          settings_set(storage = package_storage())
           trigger_press("session_settings")
           popup_success("Default settings applied!")
         },
         error = popup_error()
       )
-      
     })
     
     # Save settings
@@ -98,127 +204,11 @@ mod_session_settings_server <- function(id) {
       tryCatch(
         expr = {
           popup_loading("Saving session settings...")
-          storage_update(rv_path())
+          settings_set(storage = rv_path())
           trigger_press("session_settings")
           popup_success("Session settings updated!")
         },
         error = popup_error()
-      )
-    })
-    
-  })
-}
-
-# PUBLICATION SETTINGS ----------------------------------------------------
-
-#' @importFrom shinyjs disabled
-mod_session_publications_ui <- function(id) {
-  ns <- NS(id)
-  card_primary(
-    title = "Publication Settings",
-    icon = icon("book-open"),
-    column(
-      width = 4,
-      selectInput(
-        inputId = ns("pub_id"),
-        label = "Available publications:",
-        choices = list_publications(),
-        selected = pub_get()
-      )
-    ),
-    footer = tagList(
-      btn_primary(
-        inputId = ns("btn_create"),
-        label = "Create New Publication",
-        icon = icon("add")
-      ),
-      disabled(btn_primary(
-        inputId = ns("btn_activate"),
-        label = "Activate Selected Publication",
-        icon = icon("check")
-      )),
-      disabled(btn_primary(
-        inputId = ns("btn_delete"),
-        label = "Delete Selected Publication",
-        icon = icon("trash")
-      ))
-    )
-  )
-}
-
-mod_session_publications_server <- function(id) {
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-    
-    # Session settings callback
-    on_trigger("session_settings", trigger_press("publication_list"))
-    
-    # Publication list callback
-    on_trigger("publication_list", {
-      updateSelectInput(
-        inputId = "pub_id",
-        choices = list_publications(),
-        selected = pub_get()
-      )
-    })
-    
-    # Conduct selected publication
-    selected_pub <- reactive(input$pub_id)
-    
-    # Toggle UI
-    bind_state(c("btn_activate", "btn_delete"), selected_pub)
-    
-    # Create publication
-    rv_callback <- reactiveVal()
-    observeEvent(input$btn_create, {
-      popup_text(
-        title = "Create a Publication",
-        inputValue = "", 
-        inputPlaceholder = "publication ID",
-        confirmButtonText = "Create Publication",
-        callback = function(pub_id) {
-          if (isFALSE(pub_id)) return()
-          tryCatch(
-            expr = {
-              popup_loading("Creating publication...")
-              publication_init(pub_id)
-              pub_set(pub_id)
-              pub_write(pub_id)
-              trigger_press("publication_list")
-              popup_success("Publication created!")
-            },
-            error = popup_error()
-          )
-        }
-      )
-    })
-    
-    # Activate publication
-    observeEvent(input$btn_activate, {
-      popup_loading("Activating publication...")
-      pub_set(selected_pub())
-      pub_write(selected_pub())
-      trigger_press("active_publication")
-      popup_success("Publication activated!")
-    })
-    
-    # Delete publication
-    observeEvent(input$btn_delete, {
-      popup_confirm(
-        title = "Delete Publication?",
-        text = paste0("Publication ID: ", selected_pub()),
-        callback = function(confirm) {
-          if (isFALSE(confirm)) return()
-          tryCatch(
-            expr = {
-              popup_loading("Deleting publication...")
-              publication_delete(selected_pub())
-              trigger_press("publication_list")
-              popup_success("Publication deleted!")
-            },
-            error = popup_error()
-          )
-        }
       )
     })
     

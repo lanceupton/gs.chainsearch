@@ -9,7 +9,7 @@ app_ui <- function(request) {
       body = app_body(),
       controlbar = app_controlbar(),
       footer = app_footer(),
-      title = app_title(),
+      title = app_config_get("app_title"),
       preloader = app_waiter_opts(),
       fullscreen = TRUE,
       help = FALSE,
@@ -20,11 +20,10 @@ app_ui <- function(request) {
 }
 
 #' @importFrom bs4Dash bs4DashBrand bs4DashNavbar
-#' @importFrom golem get_golem_name
 app_header <- function() {
   bs4DashNavbar(
     title = bs4DashBrand(
-      title = app_title(),
+      title = app_config_get("app_title"),
       color = "primary",
       href = app_config_get("app_github"),
       image = "https://picsum.photos/200",
@@ -45,7 +44,10 @@ app_sidebar <- function() {
     expandOnHover = TRUE,
     fixed = TRUE,
     id = "sidebar",
-    customArea = NULL,
+    customArea = tagList(
+      tags$div(class = "text-muted", package_label()),
+      tags$div(class = "text-muted", R.version.string)
+    ),
     bs4SidebarMenu(
       id = "tab",
       bs4SidebarMenuItem(
@@ -142,6 +144,6 @@ golem_add_external_resources <- function() {
     useShinyjs(),
     useWaiter(),
     # Initialize working session
-    session_init()
+    initialize_session()
   )
 }

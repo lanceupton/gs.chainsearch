@@ -24,6 +24,16 @@ The general strategy is as follows:
 Contributions are more than welcome! See [CONTRIBUTING](.github/CONTRIBUTING.md) for guidance.
 
 
+### Prerequisites
+
+* This package performs web scraping with the `RSelenium` package, which uses the WebDriver API in Selenium 2. This requires you to have [Java](https://www.java.com/en/download/manual.jsp) installed on your machine.
+
+
+
+
+
+
+
 ### Package Data
 
 By default, this package tracks files within the R user package cache (see `tools::R_user_dir`). This can be modified to any mounted directory via `storage_update`. Each cornerstone publication is given a dedicated subdirectory within that. The structure is as follows:

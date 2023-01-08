@@ -28,6 +28,6 @@ app_config <- function() {
 }
 
 #' @importFrom golem get_golem_name get_golem_version
-app_title <- function() {
+package_label <- function() {
   paste0(get_golem_name(), " (v", get_golem_version(), ")")
 }

@@ -1,5 +1,4 @@
 
-#' @importFrom golem get_golem_name
 package_disclaimer <- function() {
   paste0(
     "Methods provided by this package, including the shiny interface, ",

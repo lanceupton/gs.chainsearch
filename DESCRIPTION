@@ -17,6 +17,7 @@ Imports:
     fs (>= 1.5.2),
     gargoyle (>= 0.0.1),
     golem (>= 0.3.5),
+    httr (>= 1.4.4),
     renv (>= 0.16.0),
     RSelenium (>= 1.7.9),
     rvest (>= 1.0.3),

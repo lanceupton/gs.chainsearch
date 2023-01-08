@@ -82,7 +82,7 @@ settings_file <- function() {
 settings_default <- function() {
   list(
     storage = package_storage(),
-    url = "https://www.amazon.com/s"
+    url = "https://books.toscrape.com/"
   )
 }
 

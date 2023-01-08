@@ -57,6 +57,7 @@ mod_scrape_settings_server <- function(id) {
         expr = {
           popup_loading("Saving scrape settings...")
           settings_set(url = input$url)
+          scrape_url()
           trigger_press("session_settings")
           popup_success("Scrape settings saved!")
         },
@@ -89,9 +90,10 @@ mod_scrape_job_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$ui_page <- renderUI(
-      tags$iframe(src = "https://www.amazon.com/s", width = "100%", height = "500px")
-    )
+    output$ui_page <- renderUI({
+      trigger_watch("session_settings")
+      tags$iframe(src = settings_get("url"), width = "100%", height = "500px")
+    })
     
   })
 }

@@ -1,4 +1,18 @@
 
+# I/O ---------------------------------------------------------------------
+
+#' @importFrom data.table fwrite
+write_csv <- function(x, file) {
+  fwrite(x, file)
+}
+
+#' @importFrom data.table fread
+read_csv <- function(file, ...) {
+  fread(file = file, stringsAsFactors = FALSE, check.names = FALSE, fill = TRUE, data.table = FALSE, ...)
+}
+
+# SHINY -------------------------------------------------------------------
+
 # Create an observer to toggle DOM based on truthiness of a reactive expression
 #' @importFrom shinyjs toggleState
 bind_state <- function(id, condition, invert = FALSE, asis = FALSE) {
@@ -33,7 +47,9 @@ on_trigger <- function(id, expr) {
   fun <- quoToFunction(enquo0(expr))
   on(id, fun())
 }
-  
+
+# HELPERS -----------------------------------------------------------------
+
 #' @importFrom shiny isTruthy
 "%||%" <- function(x, y) {
   if (isTruthy(x)) x else if (isTruthy(y)) y else NULL

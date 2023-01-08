@@ -22,7 +22,13 @@ card_primary <- function(title, ..., width = NULL, icon = NULL, footer = NULL) {
 }
 
 #' @importFrom DT datatable formatRound
-dt_minimal <- function(data, colnames) {
+dt_minimal <- function(data, colnames, selection = c("single", "multiple", "none")) {
+  selection <- match.arg(selection)
+  if (identical(selection, "none")) {
+    selection <- NULL
+  } else {
+    selection <- list(mode = selection, target = "row")
+  }
   datatable(
     data = data,
     rownames = NULL,
@@ -34,7 +40,7 @@ dt_minimal <- function(data, colnames) {
     width = NULL,
     height = NULL,
     elementId = NULL,
-    selection = list(mode = "single", target = "row")
+    selection = selection
   ) |>
     formatRound(columns = which(sapply(data, is.numeric)), digits = 2)
 }

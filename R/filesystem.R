@@ -1,6 +1,16 @@
 
 # USER-FACING -------------------------------------------------------------
 
+#' Purge Package Directory.
+#' 
+#' Deletes all files in the package directory.
+#'
+#' @export
+#'
+purge_storage <- function() {
+  unlink(package_storage(), recursive = TRUE)
+}
+
 #' Initialize a Working Session.
 #' 
 #' Restore the local environment to use methods from the package.
@@ -13,7 +23,7 @@ initialize_session <- function() {
   # Create package storage
   dir_create(package_storage())
   # Restore active session
-  session_set(session_read())
+  session_set(session_read() %||% "default")
   # Create default config
   settings_init()
   # Restore proxy blacklist

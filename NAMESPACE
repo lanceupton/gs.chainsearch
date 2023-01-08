@@ -2,6 +2,7 @@
 
 export(app_run)
 export(initialize_session)
+export(purge_storage)
 importFrom(DT,DTOutput)
 importFrom(DT,datatable)
 importFrom(DT,formatRound)

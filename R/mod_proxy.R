@@ -4,6 +4,7 @@
 mod_proxy_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    mod_proxy_header_ui(ns("header")),
     mod_proxy_table_ui(ns("table")),
     mod_proxy_blacklist_ui(ns("blacklist"))
   )
@@ -16,8 +17,37 @@ mod_proxy_server <- function(id) {
     # Initialize global triggers
     trigger_init("proxy_blacklist")
     
+    # Modules
+    mod_proxy_header_server("header")
     mod_proxy_table_server("table")
     mod_proxy_blacklist_server("blacklist")
+    
+  })
+}
+
+# PROXY TABLE -------------------------------------------------------------
+
+#' @importFrom bs4Dash bs4Callout
+mod_proxy_header_ui <- function(id) {
+  ns <- NS(id)
+  bs4Callout(
+    title = "Heads up!",
+    status = "danger",
+    width = NULL,
+    id = ns("callout"),
+    "Proxy usage is disabled for this session.",
+    "It can be enabled in the 'Session Settings' tab."
+  )
+}
+
+mod_proxy_header_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+    # Toggle UI
+    no_proxy <- reactiveVal(settings_get("no_proxy"))
+    on_trigger("session_settings", no_proxy(settings_get("no_proxy")))
+    bind_visibility("callout", no_proxy)
     
   })
 }

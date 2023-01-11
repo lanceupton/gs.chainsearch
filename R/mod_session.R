@@ -145,6 +145,12 @@ mod_session_settings_ui <- function(id) {
   card_primary(
     title = "Session Settings",
     icon = icon("folder-tree"),
+    checkboxInput(
+      inputId = ns("no_proxy"),
+      label = "Disable Proxy?",
+      value = settings_get("no_proxy")
+    ),
+    tags$hr(),
     shinyDirButton(
       id = ns("storage_dir"),
       label = "Select Storage Directory",
@@ -174,22 +180,29 @@ mod_session_settings_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # Update UI from triggers
     rv_path <- reactiveVal(settings_get("storage"))
     on_trigger("active_session", trigger_press("session_settings"))
-    on_trigger("session_settings", rv_path(settings_get("storage")))
+    on_trigger("session_settings", {
+      updateCheckboxInput(inputId = "no_proxy", value = settings_get("no_proxy"))
+      rv_path(settings_get("storage"))
+    })
     
+    # Storage input backend
     shinyDirChoose(
       input = input,
       id = "storage_dir",
       roots = list_user_volumes()
     )
     
+    # Handle storage input
     observeEvent(input$storage_dir, {
       req(is.list(input$storage_dir))
       path <- parseDirPath(roots = list_user_volumes(), selection = input$storage_dir)
       rv_path(path)
     })
     
+    # Storage label
     output$storage_dir <- renderText(rv_path())
     
     # Apply default settings
@@ -197,7 +210,7 @@ mod_session_settings_server <- function(id) {
       tryCatch(
         expr = {
           popup_loading("Applying default settings...")
-          settings_set(storage = package_storage())
+          settings_set(no_proxy = TRUE, storage = package_storage())
           trigger_press("session_settings")
           popup_success("Default settings applied!")
         },
@@ -210,7 +223,7 @@ mod_session_settings_server <- function(id) {
       tryCatch(
         expr = {
           popup_loading("Saving session settings...")
-          settings_set(storage = rv_path())
+          settings_set(no_proxy = input$no_proxy, storage = rv_path())
           trigger_press("session_settings")
           popup_success("Session settings updated!")
         },

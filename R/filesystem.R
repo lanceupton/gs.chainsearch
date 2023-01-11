@@ -8,6 +8,7 @@
 #' @export
 #'
 purge_storage <- function() {
+  LOG_MSG("Purging package storage")
   unlink(package_storage(), recursive = TRUE)
 }
 
@@ -31,9 +32,6 @@ initialize_session <- function() {
   proxybl_set(proxybl)
   # Refresh proxy list
   refresh_proxy_list()
-  # Set new active proxy
-  proxy_set()
-  # Return invisible so no tags are included
   return(invisible())
 }
 
@@ -92,6 +90,7 @@ settings_file <- function() {
 settings_default <- function() {
   list(
     storage = package_storage(),
+    no_proxy = TRUE,
     url = "https://books.toscrape.com/"
   )
 }
@@ -146,8 +145,12 @@ package_storage <- function() {
   R_user_dir(package = get_golem_name(), which = "cache")
 }
 
-# Construct filepath within active storage
 #' @importFrom fs path
 package_path <- function(..., ext = "") {
   path(package_storage(), ..., ext = ext)
+}
+
+#' @importFrom fs path
+session_path <- function(..., ext = "") {
+  path(settings_get("storage"), ..., ext = ext)
 }

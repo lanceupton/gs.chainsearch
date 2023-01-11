@@ -18,7 +18,7 @@ refresh_proxy_list <- function(force = FALSE) {
     proxytab_set(tab)
     return()
   }
-  LOG_MSG("Refreshing proxy table")
+  LOG_MSG("Refreshing proxy table...")
   # Fetch new table
   tab <- fetch_proxy_table()
   # Remove blacklisted entries
@@ -49,7 +49,7 @@ proxytab_set <- function(tab) {
 }
 #' @importFrom shiny getShinyOption
 proxytab_get <- function() {
-  getShinyOption("GS_CHAINSEARCH_PROXYTAB")
+  getShinyOption("GS_CHAINSEARCH_PROXYTAB") %||% proxytab_blank()
 }
 
 # Proxy blacklist
@@ -71,7 +71,7 @@ proxybl_set <- function(tab) {
 }
 #' @importFrom shiny getShinyOption
 proxybl_get <- function() {
-  getShinyOption("GS_CHAINSEARCH_PROXYBL")
+  getShinyOption("GS_CHAINSEARCH_PROXYBL") %||% proxybl_blank()
 }
 proxybl_add <- function(ip, port, method) {
   tmp <- proxybl_get()
@@ -91,10 +91,15 @@ proxybl_remove <- function(ip, port) {
 
 # Active proxy
 proxy_set <- function() {
-  tmp <- proxylist_sample()
-  proxy <- paste0(tmp$ip, ":", tmp$port)
-  LOG_MSG("proxy_set: ", proxy)
-  Sys.setenv(GS_CHAINSEARCH_PROXY = proxy)
+  tryCatch(
+    expr = {
+      tmp <- proxylist_sample()
+      proxy <- paste0(tmp$ip, ":", tmp$port)
+      LOG_MSG("proxy_set: ", proxy)
+      Sys.setenv(GS_CHAINSEARCH_PROXY = proxy)
+    },
+    error = popup_error()
+  )
 }
 proxy_get <- function() {
   Sys.getenv("GS_CHAINSEARCH_PROXY")
@@ -115,9 +120,6 @@ blacklist_proxy <- function(ip, port, method = c("manual", "automatic")) {
   tmp <- filter_proxy_table(tmp)
   proxytab_set(tmp)
   proxytab_write(tmp)
-  # Set new proxy
-  # This guarantees that the blacklisted proxy is de-activated
-  proxy_set()
 }
 
 #' Whitelist a Proxy.
@@ -127,11 +129,6 @@ blacklist_proxy <- function(ip, port, method = c("manual", "automatic")) {
 whitelist_proxy <- function(ip, port) {
   # Remove proxy from blacklist
   proxybl_remove(ip, port)
-  # Filter proxy table
-  tmp <- proxytab_get()
-  tmp <- filter_proxy_table(tmp)
-  proxytab_set(tmp)
-  proxytab_write(tmp)
 }
 
 # UTILS -------------------------------------------------------------------
@@ -179,7 +176,7 @@ filter_proxy_table <- function(tab) {
   i2 <- which(tab$port %in% blacklist$port)
   omit <- intersect(i1, i2)
   if (length(omit) > 0) {
-    LOG_MSG("Omitting ", length(omit), " blacklisted proxies.")
+    LOG_MSG("Omitting ", length(omit), " blacklisted proxies...", type = "warning")
     tab <- tab[-omit, ]
   }
   return(tab)
@@ -188,6 +185,7 @@ filter_proxy_table <- function(tab) {
 # Sample random proxy from proxy table
 proxylist_sample <- function() {
   tmp <- proxytab_get()
+  if (length(tmp) == 0) stop("Proxy list is empty.") 
   row <- sample(nrow(tmp), 1)
   list(
     ip = tmp$ip[row],
@@ -198,7 +196,6 @@ proxylist_sample <- function() {
 # UI ----------------------------------------------------------------------
 
 dt_proxytab <- function(tab) {
-  if (is.null(tab)) tab <- proxytab_blank()
   dt_minimal(
     data = tab[,c("ip", "port", "city", "country", "latency", "upTime")],
     colnames = c("IP", "Port", "City", "Country", "Latency (ms)", "Uptime"),
@@ -218,7 +215,6 @@ proxytab_blank <- function() {
 }
 
 dt_proxybl <- function(tab) {
-  if (is.null(tab)) tab <- proxybl_blank()
   dt_minimal(
     data = tab[,c("ip", "port", "method")],
     colnames = c("IP", "Port", "Method"),

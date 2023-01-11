@@ -57,7 +57,7 @@ mod_scrape_settings_server <- function(id) {
         expr = {
           popup_loading("Saving scrape settings...")
           settings_set(url = input$url)
-          scrape_url()
+          scrape_base_page()
           trigger_press("session_settings")
           popup_success("Scrape settings saved!")
         },

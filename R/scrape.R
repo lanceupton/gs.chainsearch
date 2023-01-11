@@ -1,20 +1,54 @@
 
-#' @importFrom httr GET
-scrape_url <- function() {
-  LOG_MSG("TODO: scrape_url", type = "error")
-  # settings_set(proxy_ip = "198.211.102.65", proxy_port = 80L)
-  # curl <- getCurlHandle()
-  # curlSetOpt(.opts = list(proxy = "196.15.237.171:1888"), curl = curl)
-  # ans <- getURL("http://books.toscrape.com/", curl = curl)
-  # 
-  # getURL(
-  #   url = "http://books.toscrape.com/"
-  #   proxy = "103.87.81.86:5678"
-  # )
-  # tmp <- GET(
-  #   url = "http://books.toscrape.com/",
-  #   options = list(
-  #     proxy = "196.15.237.171:1888"
-  #   )
-  #   # httr::use_proxy("196.15.237.171:1888")
+page_file <- function(page_index) {
+  name <- paste0("page", page_index, ".html")
+  session_path(name)
+}
+
+scrape_base_page <- function() {
+  LOG_MSG("scrape_base_page")
+  scrape_page(settings_get("url"), 1)
+}
+
+#' @importFrom rvest html_attr html_elements read_html
+#' @importFrom fs dir_create
+scrape_page <- function(url, page_index) {
+  page <- read_html(url)
+  # Save links
+  links <- html_elements(page, "link")
+  for (href in html_attr(links, "href")) {
+    if (is.na(href) || is_url(href)) next
+    LOG_MSG("Downloading ", href)
+    web_file <- paste0(url, href)
+    local_file <- session_path(href)
+    dir_create(dirname(local_file))
+    download.file(web_file, local_file, quiet = TRUE)
+  }
+  # Save scripts
+  scripts <- html_elements(page, "script")
+  for (href in html_attr(scripts, "src")) {
+    if (is.na(href) || is_url(href)) next
+    LOG_MSG("Downloading ", href)
+    web_file <- paste0(url, href)
+    local_file <- session_path(href)
+    dir_create(dirname(local_file))
+    download.file(web_file, local_file, quiet = TRUE)
+  }
+  # Save images
+  imgs <- html_elements(page, "img")
+  for (href in html_attr(imgs, "src")) {
+    if (is.na(href) || is_url(href)) next
+    LOG_MSG("Downloading ", href)
+    web_file <- paste0(url, href)
+    local_file <- session_path(href)
+    dir_create(dirname(local_file))
+    download.file(web_file, local_file, quiet = TRUE)
+  }
+  # Save page
+  writeLines(as.character(page), session_path(paste0("page", page_index), ext = "html"))
+}
+
+#' @importFrom urltools url_parse
+is_url <- function(src) {
+  tmp <- url_parse(src)
+  !is.na(tmp$scheme)
 }

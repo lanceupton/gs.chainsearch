@@ -29,7 +29,8 @@ app_header <- function() {
       image = "https://picsum.photos/200",
       opacity = 1
     ),
-    status = "primary"
+    status = "primary",
+    fixed = TRUE
   )
 }
 
@@ -44,10 +45,6 @@ app_sidebar <- function() {
     expandOnHover = TRUE,
     fixed = TRUE,
     id = "sidebar",
-    customArea = tagList(
-      tags$div(class = "text-muted", package_label()),
-      tags$div(class = "text-muted", R.version.string)
-    ),
     bs4SidebarMenu(
       id = "tab",
       bs4SidebarMenuItem(
@@ -118,7 +115,7 @@ app_controlbar <- function() {
 
 #' @importFrom bs4Dash bs4DashFooter
 app_footer <- function() {
-  bs4DashFooter("FOOTER")
+  bs4DashFooter(paste(package_label(), "|", R.version.string), fixed = TRUE)
 }
 
 #' @importFrom waiter bs4_spinner

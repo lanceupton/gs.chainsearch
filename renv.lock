@@ -33,18 +33,6 @@
       "Hash": "470851b6d5d0ac559e9d01bb352b4021",
       "Requirements": []
     },
-    "RSelenium": {
-      "Package": "RSelenium",
-      "Version": "1.7.9",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "220fcb4ef5aa02aecbeaf3d9617d361b",
-      "Requirements": [
-        "caTools",
-        "httr",
-        "wdman"
-      ]
-    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.0.9",
@@ -62,14 +50,6 @@
       "Requirements": [
         "sys"
       ]
-    },
-    "assertthat": {
-      "Package": "assertthat",
-      "Version": "0.2.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "50c838a310445e954bc13f26f26a6ecf",
-      "Requirements": []
     },
     "attempt": {
       "Package": "attempt",
@@ -89,30 +69,6 @@
       "Hash": "543776ae6848fde2f48ff3816d0628bc",
       "Requirements": []
     },
-    "binman": {
-      "Package": "binman",
-      "Version": "0.1.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "36668971df260c1a5af77bfb92b1dbf5",
-      "Requirements": [
-        "assertthat",
-        "httr",
-        "jsonlite",
-        "rappdirs",
-        "semver",
-        "xml2",
-        "yaml"
-      ]
-    },
-    "bitops": {
-      "Package": "bitops",
-      "Version": "1.0-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b7d8d8ee39869c18d8846a184dd8a1af",
-      "Requirements": []
-    },
     "brew": {
       "Package": "brew",
       "Version": "1.0-8",
@@ -123,10 +79,10 @@
     },
     "bs4Dash": {
       "Package": "bs4Dash",
-      "Version": "2.1.0",
+      "Version": "2.2.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "cca14515876425caa963eb95f52e4564",
+      "Hash": "5bdfebde67149093342161c6e748ca0d",
       "Requirements": [
         "bslib",
         "fresh",
@@ -155,16 +111,6 @@
         "mime",
         "rlang",
         "sass"
-      ]
-    },
-    "caTools": {
-      "Package": "caTools",
-      "Version": "1.18.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "34d90fa5845004236b9eacafc51d07b2",
-      "Requirements": [
-        "bitops"
       ]
     },
     "cachem": {
@@ -660,17 +606,6 @@
         "withr"
       ]
     },
-    "processx": {
-      "Package": "processx",
-      "Version": "3.8.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a33ee2d9bf07564efb888ad98410da84",
-      "Requirements": [
-        "R6",
-        "ps"
-      ]
-    },
     "promises": {
       "Package": "promises",
       "Version": "1.2.0.1",
@@ -684,14 +619,6 @@
         "magrittr",
         "rlang"
       ]
-    },
-    "ps": {
-      "Package": "ps",
-      "Version": "1.7.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "68dd03d98a5efd1eb3012436de45ba83",
-      "Requirements": []
     },
     "purrr": {
       "Package": "purrr",
@@ -828,17 +755,6 @@
       "Requirements": [
         "R6",
         "stringr"
-      ]
-    },
-    "semver": {
-      "Package": "semver",
-      "Version": "0.2.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "767de4760297e70995edb7b30fbda816",
-      "Requirements": [
-        "Rcpp",
-        "assertthat"
       ]
     },
     "shiny": {
@@ -1063,20 +979,6 @@
         "R6",
         "htmltools",
         "shiny"
-      ]
-    },
-    "wdman": {
-      "Package": "wdman",
-      "Version": "0.2.6",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "cf0c1b51d169b354f561f73ee2761c18",
-      "Requirements": [
-        "assertthat",
-        "binman",
-        "processx",
-        "semver",
-        "yaml"
       ]
     },
     "whisker": {

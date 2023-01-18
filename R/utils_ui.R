@@ -10,19 +10,19 @@ btn_primary <- function(inputId, label = NULL, icon = NULL) {
 }
 
 #' @importFrom bs4Dash bs4Card
-card_primary <- function(title, ..., width = NULL, icon = NULL, footer = NULL) {
+card_primary <- function(title, ..., footer = NULL, width = NULL, icon = NULL) {
   bs4Card(
     title = title,
-    width = width,
+    footer = footer,
     status = "primary",
+    width = width,
     icon = icon,
-    ...,
-    footer = footer
+    ...
   )
 }
 
 #' @importFrom DT datatable formatRound
-dt_minimal <- function(data, colnames, selection = c("single", "multiple", "none")) {
+dt_minimal <- function(data, colnames, selection = c("single", "multiple", "none"), ...) {
   selection <- match.arg(selection)
   if (identical(selection, "none")) {
     selection <- NULL
@@ -34,13 +34,14 @@ dt_minimal <- function(data, colnames, selection = c("single", "multiple", "none
     rownames = NULL,
     colnames = colnames,
     class = "display",
-    options = list(),
+    options = list(dom = "tp"),
     escape = TRUE,
     style = "bootstrap4",
     width = NULL,
     height = NULL,
     elementId = NULL,
-    selection = selection
+    selection = selection,
+    ...
   ) |>
     formatRound(columns = which(sapply(data, is.numeric)), digits = 2)
 }

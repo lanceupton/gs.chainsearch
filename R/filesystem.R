@@ -91,7 +91,35 @@ settings_default <- function() {
   list(
     storage = package_storage(),
     no_proxy = TRUE,
-    url = "https://books.toscrape.com/"
+    url = "https://books.toscrape.com/",
+    container_xpath = "//*[@id='scrape-preview-ui_page']/div/div/div/div/section/div[2]/ol",
+    item_sel = "li > .product_pod",
+    item_meta = list(
+      list(
+        name = "rating",
+        selector = ".star-rating",
+        type = "class",
+        attribute = ""
+      ),
+      list(
+        name = "title",
+        selector = "h3 a",
+        type = "",
+        attribute = "title"
+      ),
+      list(
+        name = "price",
+        selector = ".price_color",
+        type = "value",
+        attribute = ""
+      ),
+      list(
+        name = "available",
+        selector = ".instock",
+        type = "value",
+        attribute = ""
+      )
+    )
   )
 }
 
@@ -104,7 +132,7 @@ settings_init <- function() {
   } else {
     tmp <- NULL
   }
-  lst <- merge(list(default = settings_default()), tmp)
+  lst <- merge(tmp, list(default = settings_default()))
   write_yaml(lst, file)
 }
 
@@ -123,7 +151,7 @@ settings_set <- function(..., session_id = session_get()) {
   file <- settings_file()
   tmp <- read_yaml(file)
   lst <- setNames(list(list(...)), session_id)
-  lst2 <- merge(tmp, lst)
+  lst2 <- merge(lst, tmp)
   write_yaml(lst2, file)
 }
 
